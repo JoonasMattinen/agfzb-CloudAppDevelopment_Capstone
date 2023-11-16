@@ -103,22 +103,26 @@ def get_dealerships(request):
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
-def get_dealer_details(request, id):
+def get_dealer_details(request, dealer_id):
     if request.method == "GET":
         context = {}
         dealer_url = "https://n2majo02-3000.theiadocker-1-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai//dealerships/get"
-        dealer = get_dealer_by_id_from_cf(dealer_url, id=id)
+        dealer = get_dealer_by_id_from_cf(dealer_url, dealer_id=dealer_id)
         context["dealer"] = dealer
         
-        review_url = "https://eu-de.functions.appdomain.cloud/api/v1/web/dff49010-7b55-400e-b573-255ee34c2c21/dealership-package/get-review"
-        reviews = get_dealer_reviews_from_cf(review_url, id=id)
+        review_url = "url: https://n2majo02-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
+        reviews = get_dealer_reviews_from_cf(review_url, dealer_id=dealer_id)
         context["reviews"] = reviews
+        print(reviews)
+        context["dealer_id"] = dealer_id
+        
+    return render(request, 'djangoapp/dealer_details.html', context)
 
 # Create a `add_review` view to submit a review
-def add_review(request, id):
+def add_review(request, dealer_id):
     context = {}
-    dealer_url = "https://eu-de.functions.appdomain.cloud/api/v1/web/dff49010-7b55-400e-b573-255ee34c2c21/dealership-package/get-dealership"
-    dealer = get_dealer_by_id_from_cf(dealer_url, id=id)
+    dealer_url = "https://n2majo02-3000.theiadocker-1-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai//dealerships/get"
+    dealer = get_dealer_by_id_from_cf(dealer_url, dealer_id=dealer_id)
     context["dealer"] = dealer
     
     if request.method == 'GET':
@@ -151,7 +155,7 @@ def add_review(request, id):
 
             new_payload = {}
             new_payload["review"] = payload
-            review_post_url =  "https://eu-de.functions.appdomain.cloud/api/v1/web/dff49010-7b55-400e-b573-255ee34c2c21/dealership-package/post-review"
+            review_post_url =  "https://n2majo02-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
             post_request(review_post_url, new_payload, id=id)
 
         return redirect("djangoapp:dealer_details", id=id)
