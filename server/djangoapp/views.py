@@ -110,10 +110,11 @@ def get_dealer_details(request, dealer_id):
         dealer = get_dealer_by_id_from_cf(dealer_url, dealer_id=dealer_id)
         context["dealer"] = dealer
         
-        review_url = "url: https://n2majo02-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
+        review_url = "https://n2majo02-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
         reviews = get_dealer_reviews_from_cf(review_url, dealer_id=dealer_id)
-        context["reviews"] = reviews
         print(reviews)
+
+        context["reviews"] = reviews
         context["dealer_id"] = dealer_id
         
     return render(request, 'djangoapp/dealer_details.html', context)

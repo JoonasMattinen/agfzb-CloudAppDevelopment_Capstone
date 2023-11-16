@@ -19,6 +19,12 @@
         <h5>Dealership Review</h5>
         <div class="navbar-collapse">
             <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'djangoapp:about' %}">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'djangoapp:contact' %}">Contact Us</a>
+                </li>
                 {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="btn btn-link" href="#">({{ user.username }})</a>
@@ -73,22 +79,6 @@
           </tbody>
         </table>
       </div>
-    <!-- Footer with About and Contact Us links -->
-    <footer class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
-        <div class="collapse navbar-collapse" id="navbarNavFooter">
-            <ul class="navbar-nav mx-auto">
-                <!-- Footer navbar items for "About Us" and "Contact Us" pages -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'djangoapp:about' %}">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'djangoapp:contact' %}">Contact Us</a>
-                </li>
-                <!-- Add more items as needed -->
-            </ul>
-        </div>
-    </footer>
-
 </body>
 
 </html>
