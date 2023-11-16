@@ -106,14 +106,19 @@ def get_dealerships(request):
 def get_dealer_details(request, dealer_id):
     if request.method == "GET":
         context = {}
-        dealer_url = "https://n2majo02-3000.theiadocker-1-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai//dealerships/get"
+        dealer_url = 'https://n2majo02-3000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get'
         dealer = get_dealer_by_id_from_cf(dealer_url, dealer_id=dealer_id)
         context["dealer"] = dealer
-        
+    
         review_url = "https://n2majo02-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
-        reviews = get_dealer_reviews_from_cf(review_url, dealer_id=dealer_id)
-        print(reviews)
+        reviews = get_dealer_reviews_from_cf(dealer_id=dealer_id)
 
+        # Analyze sentiment for each review
+        for review in reviews:
+            sentiment = analyze_review_sentiments(review)
+            review.sentiment = sentiment  # Update the sentiment attribute of the review
+        
+        print(reviews)
         context["reviews"] = reviews
         context["dealer_id"] = dealer_id
         
