@@ -95,7 +95,7 @@ def registration_request(request):
 def get_dealerships(request):
     if request.method == "GET":
         context = {}
-        url = "https://n2majo02-3000.theiadocker-1-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai//dealerships/get"
+        url = "https://n2majo02-3000.theiadocker-3-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
         dealerships = get_dealers_from_cf(url)
         context["dealership_list"] = dealerships
         print(context["dealership_list"])
@@ -103,32 +103,32 @@ def get_dealerships(request):
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
-def get_dealer_details(request, dealer_id):
+def get_dealer_details(request, id):
     if request.method == "GET":
         context = {}
-        dealer_url = 'https://n2majo02-3000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get'
-        dealer = get_dealer_by_id_from_cf(dealer_url, dealer_id=dealer_id)
+        dealer_url = 'https://n2majo02-3000.theiadocker-3-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get'
+        dealer = get_dealer_by_id_from_cf(dealer_url, id=id)
         context["dealer"] = dealer
     
-        review_url = "https://n2majo02-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
-        reviews = get_dealer_reviews_from_cf(dealer_id=dealer_id)
-
+        review_url = "https://n2majo02-5000.theiadocker-3-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
+        reviews = get_dealer_reviews_from_cf(review_url, id=id)
+        context["reviews"] = reviews
         # Analyze sentiment for each review
         for review in reviews:
             sentiment = analyze_review_sentiments(review)
             review.sentiment = sentiment  # Update the sentiment attribute of the review
         
         print(reviews)
-        context["reviews"] = reviews
-        context["dealer_id"] = dealer_id
+        
+        
         
     return render(request, 'djangoapp/dealer_details.html', context)
 
 # Create a `add_review` view to submit a review
-def add_review(request, dealer_id):
+def add_review(request, id):
     context = {}
-    dealer_url = "https://n2majo02-3000.theiadocker-1-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai//dealerships/get"
-    dealer = get_dealer_by_id_from_cf(dealer_url, dealer_id=dealer_id)
+    dealer_url = "https://n2majo02-3000.theiadocker-3-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
+    dealer = get_dealer_by_id_from_cf(dealer_url, id=id)
     context["dealer"] = dealer
     
     if request.method == 'GET':

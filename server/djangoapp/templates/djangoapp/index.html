@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dealership Review</title>
+    <title>Super Cars Dealships</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
@@ -16,7 +16,7 @@
 <body>
     <!-- Header with login section -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <h5>Dealership Review</h5>
+        <h5>Super Cars Dealerships</h5>
         <div class="navbar-collapse">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
@@ -64,12 +64,8 @@
           <tbody>
             {% for dealer in dealership_list %}
             <tr>
-              <td>{{dealer.dealer_id}}</td>
-              <td>
-                <a href="{% url 'djangoapp:dealer_details' dealer.dealer_id %}"
-                  >{{dealer.full_name}}</a
-                >
-              </td>
+              <td>{{dealer.id}}</td>
+              <td><a href="{% url 'djangoapp:dealer_details' dealer.id %}">{{dealer.full_name}}</a></td>
               <td>{{dealer.city}}</td>
               <td>{{dealer.address}}</td>
               <td>{{dealer.zip}}</td>

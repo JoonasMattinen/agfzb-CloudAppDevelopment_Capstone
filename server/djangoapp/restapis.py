@@ -9,8 +9,8 @@ import time
  
 
 def analyze_review_sentiments(text):
-    url = "https://api.eu-gb.natural-language-understanding.watson.cloud.ibm.com/instances/a7d55b2b-30e4-4d58-91a1-bd84cb7b5c14"
-    api_key = "S8Ncd3903aq7KoTo6MJPqi3nrpIvivQuWJdwqmMQifFK"
+    url = "https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com/instances/9043cccb-0e4b-483d-8b6b-f389506ac79e"
+    api_key = "OVjNiyfnfKGbpQ5RpP5cTZw_AvJkuCEs6feGCPiivW7E"
     authenticator = IAMAuthenticator(api_key)
     natural_language_understanding = NaturalLanguageUnderstandingV1(version='2021-08-01',authenticator=authenticator)
     natural_language_understanding.set_service_url(url)
@@ -42,7 +42,7 @@ def get_dealers_from_cf(url, **kwargs):
             # print(dealer_doc)
             # Create a CarDealer object with values in `doc` object
             dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"],
-                                   dealer_id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
+                                   id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
                                 
                                    st=dealer_doc["st"], zip=dealer_doc["zip"],short_name=dealer_doc["short_name"],)
             results.append(dealer_obj)
@@ -50,8 +50,8 @@ def get_dealers_from_cf(url, **kwargs):
     return results
 
 
-def get_dealer_by_id_from_cf(url, dealer_id):
-    json_result = get_request(url, dealer_id=dealer_id)
+def get_dealer_by_id_from_cf(url, id):
+    json_result = get_request(url, id=id)
     print('json_result from line 54',json_result)
 
     if json_result:
@@ -60,7 +60,7 @@ def get_dealer_by_id_from_cf(url, dealer_id):
     
         dealer_doc = dealers[0]
         dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"],
-                                dealer_id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
+                                id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
                                 st=dealer_doc["st"], zip=dealer_doc["zip"], short_name=dealer_doc["short_name"])
     return dealer_obj
 
@@ -68,13 +68,14 @@ def get_dealer_by_id_from_cf(url, dealer_id):
 def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
     id = kwargs.get("id")
+
     if id:
-        json_result = get_request(url, dealer_id=dealer_id)
+        json_result = get_request(url, id=id)
     else:
         json_result = get_request(url)
-    # print(json_result)
+    
     if json_result:
-        print("line 105---------------------->>>>>>",json_result)
+        print("line 79",json_result)
         reviews = json_result["data"]["docs"]
         for dealer_review in reviews:
             review_obj = DealerReview(dealership=dealer_review["dealership"],
