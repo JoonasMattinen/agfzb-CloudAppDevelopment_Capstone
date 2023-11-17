@@ -68,31 +68,36 @@ def get_dealer_by_id_from_cf(url, id):
 def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
     id = kwargs.get("id")
-
     if id:
         json_result = get_request(url, id=id)
     else:
         json_result = get_request(url)
-    
+    print(json_result, "96")
     if json_result:
-        print("line 79",json_result)
-        reviews = json_result
+        if isinstance(json_result, list):  # Check if json_result is a list
+            reviews = json_result
+        else:
+            reviews = json_result["data"]["docs"]
+
+        # Check if 'reviews' is a list of one dictionary
+        if isinstance(reviews, list) and len(reviews) == 1 and isinstance(reviews[0], dict):
+            reviews = reviews[0]
+
         for dealer_review in reviews:
-            review_obj = DealerReview(dealership=dealer_review["dealership"],
-                                   name=dealer_review["name"],
-                                   purchase=dealer_review["purchase"],
-                                   review=dealer_review["review"])
-            if "id" in dealer_review:
-                review_obj.id = dealer_review["id"]
-            if "purchase_date" in dealer_review:
-                review_obj.purchase_date = dealer_review["purchase_date"]
-            if "car_make" in dealer_review:
-                review_obj.car_make = dealer_review["car_make"]
-            if "car_model" in dealer_review:
-                review_obj.car_model = dealer_review["car_model"]
-            if "car_year" in dealer_review:
-                review_obj.car_year = dealer_review["car_year"]
-            
+            print("dealer_review--------------------", dealer_review)  # Print dealer_review
+            if isinstance(dealer_review, str):  # Check if dealer_review is a string
+                try:
+                    dealer_review = json.loads(dealer_review)
+                except json.JSONDecodeError:
+                    continue  # Skip this iteration if the JSON decoding fails
+
+            review_obj = DealerReview(
+                dealership=dealer_review.get("dealership"),
+                name=dealer_review.get("name"),
+                purchase=dealer_review.get("purchase"),
+                review=dealer_review.get("review"),
+            )
+
             sentiment = analyze_review_sentiments(review_obj.review)
             print(sentiment)
             review_obj.sentiment = sentiment
@@ -101,13 +106,12 @@ def get_dealer_reviews_from_cf(url, **kwargs):
     return results
 
 
-def get_request(url, **kwargs):
-    # If argument contains API KEY
-    api_key = kwargs.get("api_key")
-    response = None  # Initialize response to None
 
-    print("GET from {} ".format(url))
+def get_request(url, **kwargs):
     
+    # If argument contain API KEY
+    api_key = kwargs.get("api_key")
+    print("GET from {} ".format(url))
     try:
         if api_key:
             params = dict()
@@ -118,22 +122,17 @@ def get_request(url, **kwargs):
             response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
                                     auth=HTTPBasicAuth('apikey', api_key))
         else:
-            # Call get method of the requests library with URL and parameters
+            # Call get method of requests library with URL and parameters
             response = requests.get(url, headers={'Content-Type': 'application/json'},
-                                     params=kwargs)
-    except Exception as e:
-        # If any error occurs, handle the exception
-        print("Network exception occurred:", e)
+                                    params=kwargs)
+    except:
+        # If any error occurs
+        print("Network exception occurred")
 
-    # Check if response is None (no successful request)
-    if response is not None:
-        status_code = response.status_code
-        print("With status {} ".format(status_code))
-        json_data = json.loads(response.text)
-        return json_data
-    else:
-        # Handle the case where response is None (no successful request)
-        return None
+    status_code = response.status_code
+    print("With status {} ".format(status_code))
+    json_data = json.loads(response.text)
+    return json_data
 
 
 
