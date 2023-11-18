@@ -54,7 +54,7 @@
         <!-- Review content here -->
         <div class="container-fluid" style="padding:50px;">
             <h3>Add a review about <b>{{dealer.full_name}}</b></h3>
-            <form action="{% url 'djangoapp:add_review' dealer.id%}" method="post">
+            <form action="{% url 'djangoapp:add_review' dealer.dealer_id %}" method="post">
                 <div class="form-group">
     
                     <div class="mb-3">
