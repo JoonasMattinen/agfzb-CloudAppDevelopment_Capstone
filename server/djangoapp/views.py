@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
 from .models import CarModel, CarMake
 # from .restapis import related methods
-from .restapis import get_dealers_from_cf, get_dealer_by_id_from_cf,get_dealer_reviews_from_cf, analyze_review_sentiments
+from .restapis import get_dealers_from_cf, get_dealer_by_id_from_cf,get_dealer_reviews_from_cf, analyze_review_sentiments,post_request
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -123,13 +123,13 @@ def get_dealer_details(request, dealer_id):
 
         context["reviews"] = reviews  # Pass the list of reviews directly, without serializing to JSON
         return render(request, 'djangoapp/dealer_details.html', context)
+
 # Create a `add_review` view to submit a review
 def add_review(request, dealer_id):
     context = {}
-    dealer_url = "https://n2majo02-3000.theiadocker-3-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
+    dealer_url = "https://n2majo02-3000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
     dealer = get_dealer_by_id_from_cf(dealer_url, dealer_id=dealer_id)
     context["dealer"] = dealer
-    
     if request.method == 'GET':
         # Get cars for the dealer
         cars = CarModel.objects.all()
@@ -154,14 +154,13 @@ def add_review(request, dealer_id):
                 if request.POST["purchasecheck"] == 'on':
                     payload["purchase"] = True
             payload["purchase_date"] = request.POST["purchasedate"]
-            payload["car_make"] = car.car_make.make_name
-            payload["car_model"] = car.car_model
-            payload["car_year"] = int(car.car_year)
+            payload["car_make"] = car.make.name  
+            payload["car_model"] = car.name
+            payload["car_year"] = int(car.year.strftime("%Y"))
 
             new_payload = {}
             new_payload["review"] = payload
-            review_post_url =  "https://n2majo02-5000.theiadocker-3-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
+            review_post_url = "https://n2majo02-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
             post_request(review_post_url, new_payload, dealer_id=dealer_id)
-
         return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
 

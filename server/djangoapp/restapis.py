@@ -42,7 +42,7 @@ def get_dealers_from_cf(url, **kwargs):
     else:
         json_result = get_request(url)
 
-    print('json_result from line 31', json_result)    
+    # print('json_result from line 31', json_result)    
 
     if json_result:
         # Get the row list in JSON as dealers
@@ -51,7 +51,7 @@ def get_dealers_from_cf(url, **kwargs):
         for dealer in dealers:
             # Get its content in `doc` object
             dealer_doc = dealer
-            print(dealer_doc)
+            # print(dealer_doc)
             # Create a CarDealer object with values in `doc` object
             dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"],
                                    dealer_id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
@@ -64,20 +64,20 @@ def get_dealers_from_cf(url, **kwargs):
 def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
     dealer_id = kwargs.get("dealer_id")
-    print("DEALER_ID ------------------->>>>>>>",dealer_id)
+    # print("DEALER_ID ------------------->>>>>>>",dealer_id)
     if dealer_id:
         json_result = get_request(url, dealer_id=dealer_id)
     else:
         json_result = get_request(url)
-    print(json_result)
-    print("############################################")
+    # print(json_result)
+    # print("############################################")
     if json_result:
-        print("LINE 67 --------->>>>>>>>", json_result)
+        # print("LINE 67 --------->>>>>>>>", json_result)
         reviews = json_result
         for dealer_review in reviews:
             print(dealer_review)
             review_obj = DealerReview(
-                review_id=dealer_review.get("review_id"),
+                name=dealer_review.get("name"),
                 dealer_id=dealer_review.get("id"),
                 review=dealer_review.get("review"),
                 purchase=dealer_review.get("purchase"),
@@ -103,6 +103,7 @@ def get_dealer_by_id_from_cf(url, dealer_id):
     if json_result:
         # Get the row list in JSON as dealers
         dealers = json_result
+        print("LINE 106---------->>>>>>>>>", dealers)
         # For each dealer object
         for dealer in dealers:
             # Get its content in `doc` object
@@ -121,8 +122,6 @@ def get_dealer_by_id_from_cf(url, dealer_id):
                 results.append(dealer_obj)
 
     return results[0]
-
-
 
 
 def get_request(url, **kwargs):
