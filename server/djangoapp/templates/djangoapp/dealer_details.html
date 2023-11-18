@@ -64,7 +64,7 @@
                             <p class="card-text"><strong>Review ID:</strong> {{ review.review_id }}</p>
                             <p class="card-text"><strong>Purchase:</strong> {{ review.purchase }}</p>
                             <p class="card-text"><strong>Purchase Date:</strong> {{ review.purchase_date }}</p>
-                            <p class="card-text"><strong>Dealer ID:</strong> {{ review.id }}</p>
+                            <p class="card-text"><strong>Dealer ID:</strong> {{ review.dealer_id }}</p>
                             <p class="card-text"><strong>Review Content:</strong> {{ review.review }}</p>
                             <p class="card-text"><strong>Sentiment:</strong> {{ review.sentiment }}</p>
                         </div>
@@ -79,7 +79,7 @@
             </div>
         </div>
         <div class="text-center mt-4">
-            <a class="btn btn-link" href="{% url 'djangoapp:add_review' dealer.id%}">Add Review</a>
+            <a class="btn btn-link" href="{% url 'djangoapp:add_review' dealer.dealer_id%}">Add Review</a>
         </div>
 
     

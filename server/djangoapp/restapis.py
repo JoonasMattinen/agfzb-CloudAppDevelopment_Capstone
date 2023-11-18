@@ -8,18 +8,30 @@ from ibm_watson.natural_language_understanding_v1 import Features,SentimentOptio
 import time
  
 
-def analyze_review_sentiments(text):
-    url = "https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com/instances/9043cccb-0e4b-483d-8b6b-f389506ac79e"
+def analyze_review_sentiments(dealer_review):
     api_key = "OVjNiyfnfKGbpQ5RpP5cTZw_AvJkuCEs6feGCPiivW7E"
+    url = "https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com/instances/9043cccb-0e4b-483d-8b6b-f389506ac79e"
+    texttoanalyze= dealer_review
+    version = '2020-08-01'
     authenticator = IAMAuthenticator(api_key)
-    natural_language_understanding = NaturalLanguageUnderstandingV1(version='2021-08-01',authenticator=authenticator)
+    natural_language_understanding = NaturalLanguageUnderstandingV1(
+    version='2020-08-01',
+    authenticator=authenticator
+    )
     natural_language_understanding.set_service_url(url)
-    response = natural_language_understanding.analyze( text=text+"hello hello hello",features=Features(sentiment=SentimentOptions(targets=[text+"hello hello hello"]))).get_result()
-    label=json.dumps(response, indent=2)
-    label = response['sentiment']['document']['label']
+    response = natural_language_understanding.analyze(
+        text=dealer_review,
+        language='en',
+        features= Features(sentiment= SentimentOptions())
+    ).get_result()
+    print(json.dumps(response))
+    sentiment_score = str(response["sentiment"]["document"]["score"])
+    sentiment_label = response["sentiment"]["document"]["label"]
+    print(sentiment_score)
+    print(sentiment_label)
+    sentiment = sentiment_label
     
-    
-    return(label)
+    return sentiment
 
 
 def get_dealers_from_cf(url, **kwargs):
@@ -30,7 +42,7 @@ def get_dealers_from_cf(url, **kwargs):
     else:
         json_result = get_request(url)
 
-    # print('json_result from line 31', json_result)    
+    print('json_result from line 31', json_result)    
 
     if json_result:
         # Get the row list in JSON as dealers
@@ -39,71 +51,77 @@ def get_dealers_from_cf(url, **kwargs):
         for dealer in dealers:
             # Get its content in `doc` object
             dealer_doc = dealer
-            # print(dealer_doc)
+            print(dealer_doc)
             # Create a CarDealer object with values in `doc` object
             dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"],
-                                   id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
+                                   dealer_id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
                                 
                                    st=dealer_doc["st"], zip=dealer_doc["zip"],short_name=dealer_doc["short_name"],)
             results.append(dealer_obj)
 
     return results
 
-
-def get_dealer_by_id_from_cf(url, id):
-    json_result = get_request(url, id=id)
-    print('json_result from line 54',json_result)
-
-    if json_result:
-        dealers = json_result
-        
-    
-        dealer_doc = dealers[0]
-        dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"],
-                                id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
-                                st=dealer_doc["st"], zip=dealer_doc["zip"], short_name=dealer_doc["short_name"])
-    return dealer_obj
-
-
 def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
-    id = kwargs.get("id")
-    if id:
-        json_result = get_request(url, id=id)
+    dealer_id = kwargs.get("dealer_id")
+    print("DEALER_ID ------------------->>>>>>>",dealer_id)
+    if dealer_id:
+        json_result = get_request(url, dealer_id=dealer_id)
     else:
         json_result = get_request(url)
-    print(json_result, "96")
+    print(json_result)
+    print("############################################")
     if json_result:
-        if isinstance(json_result, list):  # Check if json_result is a list
-            reviews = json_result
-        else:
-            reviews = json_result["data"]["docs"]
-
-        # Check if 'reviews' is a list of one dictionary
-        if isinstance(reviews, list) and len(reviews) == 1 and isinstance(reviews[0], dict):
-            reviews = reviews[0]
-
+        print("LINE 67 --------->>>>>>>>", json_result)
+        reviews = json_result
         for dealer_review in reviews:
-            print("dealer_review--------------------", dealer_review)  # Print dealer_review
-            if isinstance(dealer_review, str):  # Check if dealer_review is a string
-                try:
-                    dealer_review = json.loads(dealer_review)
-                except json.JSONDecodeError:
-                    continue  # Skip this iteration if the JSON decoding fails
-
+            print(dealer_review)
             review_obj = DealerReview(
-                dealership=dealer_review.get("dealership"),
-                name=dealer_review.get("name"),
-                purchase=dealer_review.get("purchase"),
+                review_id=dealer_review.get("review_id"),
+                dealer_id=dealer_review.get("id"),
                 review=dealer_review.get("review"),
+                purchase=dealer_review.get("purchase"),
+                purchase_date=dealer_review.get("purchase_date"),
+                car_make=dealer_review.get("car_make"),
+                car_model=dealer_review.get("car_model"),
+                car_year=dealer_review.get("car_year"),
+                sentiment='',
             )
 
             sentiment = analyze_review_sentiments(review_obj.review)
             print(sentiment)
             review_obj.sentiment = sentiment
             results.append(review_obj)
-
     return results
+
+def get_dealer_by_id_from_cf(url, dealer_id):
+    results = []
+
+    # Call get_request with a URL parameter
+    json_result = get_request(url, dealer_id=dealer_id)
+
+    if json_result:
+        # Get the row list in JSON as dealers
+        dealers = json_result
+        # For each dealer object
+        for dealer in dealers:
+            # Get its content in `doc` object
+            dealer_doc = dealer
+            if dealer_doc["id"] == dealer_id:
+                # Create a CarDealer object with values in `doc` object
+                dealer_obj = CarDealer(address=dealer_doc["address"], 
+                                       city=dealer_doc["city"], 
+                                       full_name=dealer_doc["full_name"],
+                                       dealer_id=dealer_doc["id"], 
+                                       lat=dealer_doc["lat"], 
+                                       long=dealer_doc["long"],
+                                       short_name=dealer_doc["short_name"],
+                                       st=dealer_doc["st"], 
+                                       zip=dealer_doc["zip"])                    
+                results.append(dealer_obj)
+
+    return results[0]
+
 
 
 
