@@ -1,6 +1,6 @@
 from cloudant.client import Cloudant
 from cloudant.query import Query
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort
 import atexit
 
 #Add your Cloudant service credentials here
@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 @app.route('/api/get_reviews', methods=['GET'])
 def get_reviews():
-    dealership_id = request.args.get('dealer_id')
+    dealership_id = request.args.get('dealerId')
 
     # Check if "id" parameter is missing
     if dealership_id is None:

@@ -5,7 +5,7 @@ from requests.auth import HTTPBasicAuth
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_watson.natural_language_understanding_v1 import Features,SentimentOptions
-import time
+import datetime
  
 
 def analyze_review_sentiments(dealer_review):
@@ -36,14 +36,8 @@ def analyze_review_sentiments(dealer_review):
 
 def get_dealers_from_cf(url, **kwargs):
     results = []
-    state = kwargs.get("state")
-    if state:
-        json_result = get_request(url, state=state)
-    else:
-        json_result = get_request(url)
-
-    # print('json_result from line 31', json_result)    
-
+    # Call get_request with a URL parameter
+    json_result = get_request(url)
     if json_result:
         # Get the row list in JSON as dealers
         dealers = json_result
@@ -51,55 +45,40 @@ def get_dealers_from_cf(url, **kwargs):
         for dealer in dealers:
             # Get its content in `doc` object
             dealer_doc = dealer
-            print(dealer_doc)
+            
             # Create a CarDealer object with values in `doc` object
-            dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"],
-                                   dealer_id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
-                                
-                                   st=dealer_doc["st"], zip=dealer_doc["zip"],short_name=dealer_doc["short_name"],)
+            dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"], full_name=dealer_doc["full_name"],
+                                   id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"],
+                                   short_name=dealer_doc["short_name"],
+                                   st=dealer_doc["st"], zip=dealer_doc["zip"])
+            
             results.append(dealer_obj)
 
     return results
 
-def get_dealer_reviews_from_cf(url, **kwargs):
+def get_dealer_reviews_from_cf(url, id, **kwargs):
     results = []
-    dealer_id = kwargs.get("dealer_id")
-    # print("DEALER_ID ------------------->>>>>>>",dealer_id)
-    if dealer_id:
-        json_result = get_request(url, dealer_id=dealer_id)
-    else:
-        json_result = get_request(url)
-    # print(json_result)
-    # print("############################################")
+    json_result = get_request(url, dealerId=id)
     if json_result:
-        print("LINE 67 --------->>>>>>>>", json_result)
         reviews = json_result
-        for dealer_review in reviews:
-            print(dealer_review)
-            review_obj = DealerReview(
-                name=dealer_review.get("name"),
-                dealer_id=dealer_review.get("dealer_id"),
-                id=dealer_review.get("id"), #reviewer id
-                review=dealer_review.get("review"),
-                purchase=dealer_review.get("purchase"),
-                purchase_date=dealer_review.get("purchase_date"),
-                car_make=dealer_review.get("car_make"),
-                car_model=dealer_review.get("car_model"),
-                car_year=dealer_review.get("car_year"),
-                sentiment='',
-            )
-            print("REVIEWER ID------------>", dealer_review.get("id"))
-            sentiment = analyze_review_sentiments(review_obj.review)
-            print(sentiment)
-            review_obj.sentiment = sentiment
+        for review in reviews:
+            review_doc = review
+            review_obj = DealerReview(dealership=review_doc["dealership"], name=review_doc["name"], purchase=review_doc["purchase"], 
+                                    review=review_doc["review"], car_make=review_doc["car_make"], car_model=review_doc["car_model"],
+                                    car_year=review_doc["car_year"], id=review_doc["id"], purchase_date=review_doc["purchase_date"],
+                                    sentiment="sentiment")
+            review_obj.sentiment = analyze_review_sentiments(review_obj.review)
+            if review_obj.purchase_date:
+                review_obj.purchase_date = datetime.datetime.strptime(review_obj.purchase_date, '%m/%d/%Y')            
             results.append(review_obj)
+
     return results
 
-def get_dealer_by_id_from_cf(url, dealer_id):
+def get_dealer_by_id_from_cf(url, id):
     results = []
 
     # Call get_request with a URL parameter
-    json_result = get_request(url, dealer_id=dealer_id)
+    json_result = get_request(url, id=id)
 
     if json_result:
         # Get the row list in JSON as dealers
@@ -109,12 +88,12 @@ def get_dealer_by_id_from_cf(url, dealer_id):
         for dealer in dealers:
             # Get its content in `doc` object
             dealer_doc = dealer
-            if dealer_doc["id"] == dealer_id:
+            if dealer_doc["id"] == id:
                 # Create a CarDealer object with values in `doc` object
                 dealer_obj = CarDealer(address=dealer_doc["address"], 
                                        city=dealer_doc["city"], 
                                        full_name=dealer_doc["full_name"],
-                                       dealer_id=dealer_doc["id"], 
+                                       id=dealer_doc["id"], 
                                        lat=dealer_doc["lat"], 
                                        long=dealer_doc["long"],
                                        short_name=dealer_doc["short_name"],
@@ -154,14 +133,9 @@ def get_request(url, **kwargs):
 
 
 
-def post_request(url, payload, **kwargs):
-    print(kwargs)
-    print("POST to {} ".format(url))
-    print(payload)
-    response = requests.post(url, params=kwargs, json=payload)
-    status_code = response.status_code
-    print("With status {} ".format(status_code))
-    json_data = json.loads(response.text)
-    return json_data
+def post_request(url, json_payload, **kwargs):
+    requests.post(url, params=kwargs, json=json_payload['review'])
+
+    return print("Review posted", json_payload)
 
 
