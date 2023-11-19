@@ -79,7 +79,7 @@ def get_dealer_reviews_from_cf(url, **kwargs):
             review_obj = DealerReview(
                 name=dealer_review.get("name"),
                 dealer_id=dealer_review.get("dealer_id"),
-                review_id=dealer_review.get("review_id"), #reviewer id
+                id=dealer_review.get("id"), #reviewer id
                 review=dealer_review.get("review"),
                 purchase=dealer_review.get("purchase"),
                 purchase_date=dealer_review.get("purchase_date"),

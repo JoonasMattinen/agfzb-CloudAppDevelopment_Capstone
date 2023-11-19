@@ -147,7 +147,7 @@ def add_review(request, dealer_id):
             car = CarModel.objects.get(pk=car_id)
             payload["time"] = datetime.utcnow().isoformat()
             payload["name"] = username
-            payload["review_id"] = review_id
+            payload["id"] = id
             payload["dealership"] = dealer_id
             payload["review"] = request.POST["content"]
             payload["purchase"] = False
@@ -164,18 +164,5 @@ def add_review(request, dealer_id):
             review_post_url = "https://n2majo02-5000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
             post_request(review_post_url, new_payload, dealer_id=dealer_id)
 
-            # Make the POST request with the correct headers
-            headers = {'Content-Type': 'application/json'}
-            response = requests.post(review_post_url, data=json_payload, headers=headers)
-
-            # Print the response content for debugging
-            print(response.content)
-
-            # Check if the request was successful
-            if response.status_code == 201:
-                return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
-            else:
-                # Handle the error
-                print(f"Error posting review: {response.text}")
         return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
 
