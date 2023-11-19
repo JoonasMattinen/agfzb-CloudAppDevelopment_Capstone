@@ -51,7 +51,7 @@ def get_dealers_from_cf(url, **kwargs):
         for dealer in dealers:
             # Get its content in `doc` object
             dealer_doc = dealer
-            # print(dealer_doc)
+            print(dealer_doc)
             # Create a CarDealer object with values in `doc` object
             dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"],
                                    dealer_id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"], full_name=dealer_doc["full_name"],
@@ -72,13 +72,14 @@ def get_dealer_reviews_from_cf(url, **kwargs):
     # print(json_result)
     # print("############################################")
     if json_result:
-        # print("LINE 67 --------->>>>>>>>", json_result)
+        print("LINE 67 --------->>>>>>>>", json_result)
         reviews = json_result
         for dealer_review in reviews:
             print(dealer_review)
             review_obj = DealerReview(
                 name=dealer_review.get("name"),
-                dealer_id=dealer_review.get("id"),
+                dealer_id=dealer_review.get("dealer_id"),
+                review_id=dealer_review.get("review_id"), #reviewer id
                 review=dealer_review.get("review"),
                 purchase=dealer_review.get("purchase"),
                 purchase_date=dealer_review.get("purchase_date"),
@@ -87,7 +88,7 @@ def get_dealer_reviews_from_cf(url, **kwargs):
                 car_year=dealer_review.get("car_year"),
                 sentiment='',
             )
-
+            print("REVIEWER ID------------>", dealer_review.get("id"))
             sentiment = analyze_review_sentiments(review_obj.review)
             print(sentiment)
             review_obj.sentiment = sentiment

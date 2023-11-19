@@ -95,7 +95,7 @@ def registration_request(request):
 def get_dealerships(request):
     if request.method == "GET":
         context = {}
-        url = "https://n2majo02-3000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
+        url = "https://n2majo02-3000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
         # Get dealers from the URL
         dealerships = get_dealers_from_cf(url)
         context['dealership_list'] = dealerships
@@ -109,11 +109,11 @@ def get_dealerships(request):
 def get_dealer_details(request, dealer_id):
     if request.method == "GET":
         context = {}
-        dealer_url = "https://n2majo02-3000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
+        dealer_url = "https://n2majo02-3000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
         dealer = get_dealer_by_id_from_cf(dealer_url, dealer_id=dealer_id)
         context["dealer"] = dealer
 
-        review_url = "https://n2majo02-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
+        review_url = "https://n2majo02-5000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
         reviews = get_dealer_reviews_from_cf(review_url, dealer_id=dealer_id)
 
         # Analyze sentiment for each review
@@ -127,9 +127,10 @@ def get_dealer_details(request, dealer_id):
 # Create a `add_review` view to submit a review
 def add_review(request, dealer_id):
     context = {}
-    dealer_url = "https://n2majo02-3000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
+    dealer_url = "https://n2majo02-3000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
     dealer = get_dealer_by_id_from_cf(dealer_url, dealer_id=dealer_id)
     context["dealer"] = dealer
+
     if request.method == 'GET':
         # Get cars for the dealer
         cars = CarModel.objects.all()
@@ -146,8 +147,8 @@ def add_review(request, dealer_id):
             car = CarModel.objects.get(pk=car_id)
             payload["time"] = datetime.utcnow().isoformat()
             payload["name"] = username
-            payload["dealership"] = id
-            payload["id"] = id
+            payload["review_id"] = review_id
+            payload["dealership"] = dealer_id
             payload["review"] = request.POST["content"]
             payload["purchase"] = False
             if "purchasecheck" in request.POST:
@@ -160,7 +161,21 @@ def add_review(request, dealer_id):
 
             new_payload = {}
             new_payload["review"] = payload
-            review_post_url = "https://n2majo02-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
+            review_post_url = "https://n2majo02-5000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
             post_request(review_post_url, new_payload, dealer_id=dealer_id)
+
+            # Make the POST request with the correct headers
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post(review_post_url, data=json_payload, headers=headers)
+
+            # Print the response content for debugging
+            print(response.content)
+
+            # Check if the request was successful
+            if response.status_code == 201:
+                return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
+            else:
+                # Handle the error
+                print(f"Error posting review: {response.text}")
         return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
 
